@@ -61,27 +61,27 @@ const auto BUTTON_2_5 = ToggleSwitch{.button = 7, .pin = -1};
 auto BUTTON_3_1 = Encoder{.buttonLeft = 8,
                           .buttonRight = 9,
                           .buttonClick = 10,
-                          .pinA = 23,
-                          .pinB = 22,
-                          .pinClick = 21};
+                          .pinA = CORE_INT32_PIN,
+                          .pinB = CORE_INT22_PIN,
+                          .pinClick = CORE_INT21_PIN};
 auto BUTTON_3_2 = Encoder{.buttonLeft = 11,
                           .buttonRight = 12,
                           .buttonClick = 13,
-                          .pinA = 41,
-                          .pinB = 40,
-                          .pinClick = 39};
+                          .pinA = CORE_INT41_PIN,
+                          .pinB = CORE_INT40_PIN,
+                          .pinClick = CORE_INT39_PIN};
 auto BUTTON_3_3 = Encoder{.buttonLeft = 14,
                           .buttonRight = 15,
                           .buttonClick = 16,
-                          .pinA = 38,
-                          .pinB = 37,
-                          .pinClick = 36};
+                          .pinA = CORE_INT38_PIN,
+                          .pinB = CORE_INT37_PIN,
+                          .pinClick = CORE_INT36_PIN};
 auto BUTTON_3_4 = Encoder{.buttonLeft = 17,
                           .buttonRight = 18,
                           .buttonClick = 19,
-                          .pinA = 35,
-                          .pinB = 34,
-                          .pinClick = 33};
+                          .pinA = CORE_INT35_PIN,
+                          .pinB = CORE_INT34_PIN,
+                          .pinClick = CORE_INT33_PIN};
 
 // row four: matrix buttons (5x3)
 const auto BUTTON_4_1 = PushButton{.button = 20, .pin = -1};
@@ -106,23 +106,23 @@ const auto BUTTON_6_5 = PushButton{.button = 34, .pin = -1};
 auto BUTTON_7_1 = Encoder{.buttonLeft = 35,
                           .buttonRight = 36,
                           .buttonClick = 37,
-                          .pinA = 20,
-                          .pinB = 19,
-                          .pinClick = 18};
+                          .pinA = CORE_INT20_PIN,
+                          .pinB = CORE_INT19_PIN,
+                          .pinClick = CORE_INT18_PIN};
 
 // smaller rotary encoders
 auto BUTTON_7_2 = Encoder{.buttonLeft = 38,
                           .buttonRight = 39,
                           .buttonClick = 40,
-                          .pinA = 17,
-                          .pinB = 16,
-                          .pinClick = 15};
+                          .pinA = CORE_INT17_PIN,
+                          .pinB = CORE_INT16_PIN,
+                          .pinClick = CORE_INT15_PIN};
 auto BUTTON_7_3 = Encoder{.buttonLeft = 41,
                           .buttonRight = 42,
                           .buttonClick = 43,
-                          .pinA = 14,
-                          .pinB = 13,
-                          .pinClick = 32};
+                          .pinA = CORE_INT14_PIN,
+                          .pinB = CORE_INT13_PIN,
+                          .pinClick = CORE_INT32_PIN};
 
 //
 // We need to make a keyboard layout that the manager can use. choose one of the
@@ -231,14 +231,14 @@ public:
  * mode in this case. Polling mode can be used on any device.
  */
 void initialiseKeyboard3X5ForPollingDevicePins() {
-  keyLayout.setRowPin(0, 0);
-  keyLayout.setRowPin(1, 1);
-  keyLayout.setRowPin(2, 2);
-  keyLayout.setColPin(0, 3);
-  keyLayout.setColPin(1, 4);
-  keyLayout.setColPin(2, 5);
-  keyLayout.setColPin(3, 6);
-  keyLayout.setColPin(4, 7);
+  keyLayout.setRowPin(0, CORE_INT0_PIN);
+  keyLayout.setRowPin(1, CORE_INT1_PIN);
+  keyLayout.setRowPin(2, CORE_INT2_PIN);
+  keyLayout.setColPin(0, CORE_INT3_PIN);
+  keyLayout.setColPin(1, CORE_INT4_PIN);
+  keyLayout.setColPin(2, CORE_INT5_PIN);
+  keyLayout.setColPin(3, CORE_INT6_PIN);
+  keyLayout.setColPin(4, CORE_INT7_PIN);
 
   // create the keyboard mapped to arduino pins and with the layout chosen
   // above. it will callback our listener
