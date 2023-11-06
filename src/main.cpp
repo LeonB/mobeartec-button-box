@@ -41,8 +41,8 @@ struct Encoder {
   int pinB;
   int pinClick;
 
-  EncoderListener *encoderListener;
-  SwitchListener *switchListener;
+  EncoderListener *rotateListener;
+  SwitchListener *clickListener;
 };
 
 // row one: two toggle buttons + one big button
@@ -103,26 +103,26 @@ const auto BUTTON_6_5 = PushButton{.button = 34, .pin = -1};
 // row five: handle 3 rotary encoders at the bottom as one row
 
 // big rotary encoder
-const auto BUTTON_7_1 = Encoder{.buttonLeft = 35,
-                                .buttonRight = 36,
-                                .buttonClick = 39,
-                                .pinA = 20,
-                                .pinB = 19,
-                                .pinClick = 18};
+auto BUTTON_7_1 = Encoder{.buttonLeft = 35,
+                          .buttonRight = 36,
+                          .buttonClick = 37,
+                          .pinA = 20,
+                          .pinB = 19,
+                          .pinClick = 18};
 
 // smaller rotary encoders
-const auto BUTTON_7_2 = Encoder{.buttonLeft = 37,
-                                .buttonRight = 38,
-                                .buttonClick = 39,
-                                .pinA = 17,
-                                .pinB = 16,
-                                .pinClick = 15};
-const auto BUTTON_7_3 = Encoder{.buttonLeft = 40,
-                                .buttonRight = 41,
-                                .buttonClick = 42,
-                                .pinA = 14,
-                                .pinB = 13,
-                                .pinClick = 32};
+auto BUTTON_7_2 = Encoder{.buttonLeft = 38,
+                          .buttonRight = 39,
+                          .buttonClick = 40,
+                          .pinA = 17,
+                          .pinB = 16,
+                          .pinClick = 15};
+auto BUTTON_7_3 = Encoder{.buttonLeft = 41,
+                          .buttonRight = 42,
+                          .buttonClick = 43,
+                          .pinA = 14,
+                          .pinB = 13,
+                          .pinClick = 32};
 
 //
 // We need to make a keyboard layout that the manager can use. choose one of the
@@ -188,6 +188,7 @@ public:
       }
     }
 
+    button = button + BUTTON_3_4.buttonClick + 1;
     Serial.print("Releasing button: ");
     Serial.println(button);
     Joystick.button(button, LOW);
@@ -195,12 +196,12 @@ public:
   }
 } myKeyboardListener;
 
-class MyEncoderListener : public EncoderListener {
+class EncoderRotateListener : public EncoderListener {
 public:
   int buttonLeft;
   int buttonRight;
 
-  MyEncoderListener(int buttonLeft, int buttonRight) : EncoderListener() {
+  EncoderRotateListener(int buttonLeft, int buttonRight) : EncoderListener() {
     this->buttonRight = buttonRight;
     this->buttonLeft = buttonLeft;
   }
@@ -244,15 +245,16 @@ void initialiseKeyboard3X5ForPollingDevicePins() {
   keyboard.initialise(arduinoIo, &keyLayout, &myKeyboardListener, false);
 }
 
-class MySwitchListener : public SwitchListener {
+class EncoderClickListener : public SwitchListener {
   int button;
 
 public:
-  MySwitchListener(int button) : SwitchListener() { this->button = button; }
+  EncoderClickListener(int button) : SwitchListener() { this->button = button; }
 
   void onPressed(pinid_t pin, bool held) override {
     Serial.print("Button pressed: ");
     Serial.println(this->button);
+    Joystick.button(this->button, HIGH);
   }
   /**
    * called when a key is released
@@ -262,19 +264,20 @@ public:
   void onReleased(pinid_t pin, bool held) override {
     Serial.print("Button released: ");
     Serial.println(this->button);
+    Joystick.button(this->button, LOW);
   }
 };
 
 void initaliseEncoder(uint8_t slot, Encoder *encoder) {
-  encoder->encoderListener =
-      new MyEncoderListener(encoder->buttonLeft, encoder->buttonRight);
+  encoder->rotateListener =
+      new EncoderRotateListener(encoder->buttonLeft, encoder->buttonRight);
   HardwareRotaryEncoder *e = new HardwareRotaryEncoder(
-      encoder->pinA, encoder->pinB, encoder->encoderListener);
+      encoder->pinA, encoder->pinB, encoder->rotateListener);
   e->setUserIntention(DIRECTION_ONLY);
   switches.setEncoder(slot, e);
 
-  encoder->switchListener = new MySwitchListener(encoder->buttonClick);
-  switches.addSwitchListener(encoder->pinClick, encoder->switchListener,
+  encoder->clickListener = new EncoderClickListener(encoder->buttonClick);
+  switches.addSwitchListener(encoder->pinClick, encoder->clickListener,
                              NO_REPEAT);
 }
 
@@ -284,12 +287,13 @@ void initialiseEncoders() {
   initaliseEncoder(2, &BUTTON_3_3);
   initaliseEncoder(3, &BUTTON_3_4);
 
-  /* initaliseEncoder(0, &BUTTON_7_1); */
-  /* initaliseEncoder(1, &BUTTON_7_2); */
-  /* initaliseEncoder(2, &BUTTON_7_3); */
+  initaliseEncoder(4, &BUTTON_7_1);
+  initaliseEncoder(5, &BUTTON_7_2);
+  initaliseEncoder(6, &BUTTON_7_3);
 }
 
 void setup() {
+  /* Serial.available(); */
   Serial.begin(9600);
 
   startTaskManagerLogDelegate();

@@ -23,7 +23,9 @@ update:
 monitor:
 	pio -f -c vim device monitor
 
-compile_commands.json:
+compile_commands.json: FORCE
 	pio -f -c vim run --target compiledb
+
+FORCE: ;
 
 # vim: syntax=make ts=4 sw=4 sts=4 sr noet
