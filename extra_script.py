@@ -1,12 +1,13 @@
+import os
+import glob
+import shutil
 Import('env')
 
-print("HERE")
-# print(env.Dump())
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-arduinoteensy")
 print(FRAMEWORK_DIR)
-print("cores/usb_serial_hid")
+teensy_dir = os.path.join(FRAMEWORK_DIR, 'cores', 'teensy4')
+print(teensy_dir)
 
-# env.AddPreAction("$BUILD_DIR/firmware.elf", delete_origin_usb_desc)
-
-# def delete_origin_usb_desc:
-    # None
+# copy everything from overrides/teensy4/* to framework dir
+for file in glob.glob(os.path.join('overrides', 'teensy4', '*')):
+    shutil.copy(file, teensy_dir)
