@@ -349,6 +349,29 @@ static uint8_t joystick_report_desc[] = {
         0x27, 0xFF, 0xFF, 0, 0,         // Logical Maximum (65535)
         0x75, 0x10,                     // Report Size (16)
         0x95, 23,                       // Report Count (23)
+        0x09, 0x30,                     // Usage (X)
+        0x09, 0x31,                     // Usage (Y)
+        0x09, 0x32,                     // Usage (Z)
+        0x09, 0x33,                     // Usage (Rx)
+        0x09, 0x34,                     // Usage (Ry)
+        0x09, 0x35,                     // Usage (Rz)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
+        0x09, 0x36,                     // Usage (Slider)
         0x81, 0x02,                     // Input (variable,absolute)
         0xC0,                           // End Collection
         0x15, 0x00,                     // Logical Minimum (0)
@@ -359,6 +382,10 @@ static uint8_t joystick_report_desc[] = {
         0x95, 0x04,                     // Report Count (4)
         0x65, 0x14,                     // Unit (20)
         0x05, 0x01,                     // Usage Page (Generic Desktop)
+        0x09, 0x39,                     // Usage (Hat switch)
+        0x09, 0x39,                     // Usage (Hat switch)
+        0x09, 0x39,                     // Usage (Hat switch)
+        0x09, 0x39,                     // Usage (Hat switch)
         0x81, 0x42,                     // Input (variable,absolute,null_state)
         0xC0                            // End Collection
 };
@@ -2810,4 +2837,3 @@ const usb_descriptor_list_t usb_descriptor_list[] = {
 
 #endif // NUM_ENDPOINTS
 //#endif // F_CPU >= 20 MHz
-

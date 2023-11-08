@@ -27,6 +27,13 @@ struct ToggleSwitch {
   int pin;
 };
 
+struct ToggleSwitchDouble {
+  int buttonUp;
+  int buttonDown;
+  int pinUp;
+  int pinDown;
+};
+
 struct PushButton {
   int button;
   int pin;
@@ -46,22 +53,27 @@ struct Encoder {
 };
 
 // row one: two toggle buttons + one big button
-const auto BUTTON_1_1 = ToggleSwitch{.button = 0, .pin = -1};
-const auto BUTTON_1_2 = ToggleSwitch{.button = 1, .pin = -1};
-const auto BUTTON_1_3 = PushButton{.button = 2, .pin = -1};
+auto BUTTON_1_1 = ToggleSwitch{.button = 0, .pin = -1};
+auto BUTTON_1_2 = ToggleSwitch{.button = 1, .pin = -1};
+auto BUTTON_1_3 = PushButton{.button = 2, .pin = -1};
 
 // row two: five toggle switches
-const auto BUTTON_2_1 = ToggleSwitch{.button = 3, .pin = -1};
-const auto BUTTON_2_2 = ToggleSwitch{.button = 4, .pin = -1};
-const auto BUTTON_2_3 = ToggleSwitch{.button = 5, .pin = -1};
-const auto BUTTON_2_4 = ToggleSwitch{.button = 6, .pin = -1};
-const auto BUTTON_2_5 = ToggleSwitch{.button = 7, .pin = -1};
+auto BUTTON_2_1 = ToggleSwitchDouble{
+    .buttonUp = 3, .buttonDown = 4, .pinUp = 30, .pinDown = 31};
+auto BUTTON_2_2 = ToggleSwitchDouble{
+    .buttonUp = 5, .buttonDown = 6, .pinUp = 28, .pinDown = 29};
+auto BUTTON_2_3 = ToggleSwitchDouble{
+    .buttonUp = 7, .buttonDown = 8, .pinUp = 26, .pinDown = 27};
+auto BUTTON_2_4 = ToggleSwitchDouble{
+    .buttonUp = 9, .buttonDown = 10, .pinUp = 24, .pinDown = 25};
+auto BUTTON_2_5 = ToggleSwitchDouble{
+    .buttonUp = 11, .buttonDown = 12, .pinUp = 22, .pinDown = 23};
 
 // row three: four rotary encoders
 auto BUTTON_3_1 = Encoder{.buttonLeft = 8,
                           .buttonRight = 9,
                           .buttonClick = 10,
-                          .pinA = CORE_INT32_PIN,
+                          .pinA = CORE_INT23_PIN,
                           .pinB = CORE_INT22_PIN,
                           .pinClick = CORE_INT21_PIN};
 auto BUTTON_3_2 = Encoder{.buttonLeft = 11,
@@ -84,21 +96,21 @@ auto BUTTON_3_4 = Encoder{.buttonLeft = 17,
                           .pinClick = CORE_INT33_PIN};
 
 // row four: matrix buttons (5x3)
-const auto BUTTON_4_1 = PushButton{.button = 20, .pin = -1};
-const auto BUTTON_4_2 = PushButton{.button = 21, .pin = -1};
-const auto BUTTON_4_3 = PushButton{.button = 22, .pin = -1};
-const auto BUTTON_4_4 = PushButton{.button = 23, .pin = -1};
-const auto BUTTON_4_5 = PushButton{.button = 24, .pin = -1};
-const auto BUTTON_5_1 = PushButton{.button = 25, .pin = -1};
-const auto BUTTON_5_2 = PushButton{.button = 26, .pin = -1};
-const auto BUTTON_5_3 = PushButton{.button = 27, .pin = -1};
-const auto BUTTON_5_4 = PushButton{.button = 28, .pin = -1};
-const auto BUTTON_5_5 = PushButton{.button = 29, .pin = -1};
-const auto BUTTON_6_1 = PushButton{.button = 30, .pin = -1};
-const auto BUTTON_6_2 = PushButton{.button = 31, .pin = -1};
-const auto BUTTON_6_3 = PushButton{.button = 32, .pin = -1};
-const auto BUTTON_6_4 = PushButton{.button = 33, .pin = -1};
-const auto BUTTON_6_5 = PushButton{.button = 34, .pin = -1};
+auto BUTTON_4_1 = PushButton{.button = 20, .pin = -1};
+auto BUTTON_4_2 = PushButton{.button = 21, .pin = -1};
+auto BUTTON_4_3 = PushButton{.button = 22, .pin = -1};
+auto BUTTON_4_4 = PushButton{.button = 23, .pin = -1};
+auto BUTTON_4_5 = PushButton{.button = 24, .pin = -1};
+auto BUTTON_5_1 = PushButton{.button = 25, .pin = -1};
+auto BUTTON_5_2 = PushButton{.button = 26, .pin = -1};
+auto BUTTON_5_3 = PushButton{.button = 27, .pin = -1};
+auto BUTTON_5_4 = PushButton{.button = 28, .pin = -1};
+auto BUTTON_5_5 = PushButton{.button = 29, .pin = -1};
+auto BUTTON_6_1 = PushButton{.button = 30, .pin = -1};
+auto BUTTON_6_2 = PushButton{.button = 31, .pin = -1};
+auto BUTTON_6_3 = PushButton{.button = 32, .pin = -1};
+auto BUTTON_6_4 = PushButton{.button = 33, .pin = -1};
+auto BUTTON_6_5 = PushButton{.button = 34, .pin = -1};
 
 // row five: handle 3 rotary encoders at the bottom as one row
 
@@ -245,11 +257,11 @@ void initialiseKeyboard3X5ForPollingDevicePins() {
   keyboard.initialise(arduinoIo, &keyLayout, &myKeyboardListener, false);
 }
 
-class EncoderClickListener : public SwitchListener {
+class ClickListener : public SwitchListener {
   int button;
 
 public:
-  EncoderClickListener(int button) : SwitchListener() { this->button = button; }
+  ClickListener(int button) : SwitchListener() { this->button = button; }
 
   void onPressed(pinid_t pin, bool held) override {
     Serial.print("Button pressed: ");
@@ -268,6 +280,23 @@ public:
   }
 };
 
+void initialiseDoubleToggleSwitch(ToggleSwitchDouble *toggleSwitch) {
+  switches.addSwitchListener(toggleSwitch->pinUp,
+                             new ClickListener(toggleSwitch->buttonUp),
+                             NO_REPEAT);
+  switches.addSwitchListener(toggleSwitch->pinDown,
+                             new ClickListener(toggleSwitch->buttonDown),
+                             NO_REPEAT);
+}
+
+void initialiseDoubleToggleSwitches() {
+  initialiseDoubleToggleSwitch(&BUTTON_2_1);
+  initialiseDoubleToggleSwitch(&BUTTON_2_2);
+  initialiseDoubleToggleSwitch(&BUTTON_2_3);
+  initialiseDoubleToggleSwitch(&BUTTON_2_4);
+  initialiseDoubleToggleSwitch(&BUTTON_2_5);
+}
+
 void initaliseEncoder(uint8_t slot, Encoder *encoder) {
   encoder->rotateListener =
       new EncoderRotateListener(encoder->buttonLeft, encoder->buttonRight);
@@ -276,7 +305,7 @@ void initaliseEncoder(uint8_t slot, Encoder *encoder) {
   e->setUserIntention(DIRECTION_ONLY);
   switches.setEncoder(slot, e);
 
-  encoder->clickListener = new EncoderClickListener(encoder->buttonClick);
+  encoder->clickListener = new ClickListener(encoder->buttonClick);
   switches.addSwitchListener(encoder->pinClick, encoder->clickListener,
                              NO_REPEAT);
 }
@@ -309,6 +338,7 @@ void setup() {
   // initialiseKeyboard4X4ForInterrupt23017();
   initialiseKeyboard3X5ForPollingDevicePins();
 
+  initialiseDoubleToggleSwitches();
   initialiseEncoders();
 
   // now set up the repeat key start and interval
