@@ -119,8 +119,8 @@ let me know?  http://forum.pjrc.com/forums/4-Suggestions-amp-Bug-Reports
   #define DEVICE_PROTOCOL	0x01
   #define MANUFACTURER_NAME	{'T','e','e','n','s','y','d','u','i','n','o'}
   #define MANUFACTURER_NAME_LEN	11
-  #define PRODUCT_NAME		{'S','e','r','i','a','l','/','K','e','y','b','o','a','r','d','/','M','o','u','s','e','/','J','o','y','s','t','i','c','k'}
-  #define PRODUCT_NAME_LEN	30
+  #define PRODUCT_NAME		{'M','o','b','e','a','r','t','e','c',' ','b','u','t','t','o','o','n',' ','b','o','x'}
+  #define PRODUCT_NAME_LEN	20
   #define EP0_SIZE		64
   #define NUM_ENDPOINTS		7
   #define NUM_INTERFACE		6
