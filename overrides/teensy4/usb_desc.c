@@ -315,14 +315,6 @@ static uint8_t joystick_report_desc[] = {
         0x09, 0x35,                     //     Usage (Rz)
         0x81, 0x02,                     //     Input (variable,absolute)
         0xC0,                           //   End Collection
-        0x15, 0x00,                     //   Logical Minimum (0)
-        0x26, 0xFF, 0x03,               //   Logical Maximum (1023)
-        0x75, 0x0A,                     //   Report Size (10)
-        0x95, 0x02,                     //   Report Count (2)
-        0x09, 0x36,                     //   Usage (Slider)
-        0x09, 0x36,                     //   Usage (Slider)
-        0x81, 0x02,                     //   Input (variable,absolute)
-        0xC0                            // End Collection
 };
 #elif JOYSTICK_SIZE == 64
 // extreme joystick  (to use this, edit JOYSTICK_SIZE to 64 in usb_desc.h)
@@ -355,15 +347,6 @@ static uint8_t joystick_report_desc[] = {
         0x05, 0x01,                     //   Usage Page (Generic Desktop)
         0x09, 0x01,                     //   Usage (Pointer)
         0xA1, 0x00,                     //   Collection ()
-        0x15, 0x00,                     //     Logical Minimum (0)
-        0x26, 0xFF, 0x03,               //     Logical Maximum (1023)
-        0x75, 0x0A,                     //     Report Size (10)
-        0x95, 0x04,                     //     Report Count (4)
-        0x09, 0x30,                     //     Usage (X)
-        0x09, 0x31,                     //     Usage (Y)
-        0x09, 0x32,                     //     Usage (Z)
-        0x09, 0x35,                     //     Usage (Rz)
-        0x81, 0x02,                     //     Input (variable,absolute)
         0xC0,                           //   End Collection
         0x15, 0x00,                     //   Logical Minimum (0)
         0x26, 0xFF, 0x03,               //   Logical Maximum (1023)
