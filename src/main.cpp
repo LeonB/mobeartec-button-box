@@ -49,25 +49,32 @@ struct Encoder {
   int pinClick;
 
   EncoderListener *rotateListener;
-  SwitchListener *clickListener;
 };
 
 // row one: two toggle buttons + one big button
-auto BUTTON_1_1 = ToggleSwitch{.button = 0, .pin = -1};
+auto BUTTON_1_1 = ToggleSwitch{.button = 1, .pin = CORE_INT11_PIN};
 auto BUTTON_1_2 = ToggleSwitch{.button = 1, .pin = -1};
-auto BUTTON_1_3 = PushButton{.button = 2, .pin = -1};
+auto BUTTON_1_3 = PushButton{.button = 2, .pin = CORE_INT12_PIN};
 
 // row two: five toggle switches
-auto BUTTON_2_1 = ToggleSwitchDouble{
-    .buttonUp = 3, .buttonDown = 4, .pinUp = 30, .pinDown = 31};
-auto BUTTON_2_2 = ToggleSwitchDouble{
-    .buttonUp = 5, .buttonDown = 6, .pinUp = 28, .pinDown = 29};
-auto BUTTON_2_3 = ToggleSwitchDouble{
-    .buttonUp = 7, .buttonDown = 8, .pinUp = 26, .pinDown = 27};
-auto BUTTON_2_4 = ToggleSwitchDouble{
-    .buttonUp = 9, .buttonDown = 10, .pinUp = 24, .pinDown = 25};
+auto BUTTON_2_1 = ToggleSwitchDouble{.buttonUp = 3,
+                                     .buttonDown = 4,
+                                     .pinUp = CORE_INT30_PIN,
+                                     .pinDown = CORE_INT31_PIN};
+auto BUTTON_2_2 = ToggleSwitchDouble{.buttonUp = 5,
+                                     .buttonDown = 6,
+                                     .pinUp = CORE_INT28_PIN,
+                                     .pinDown = CORE_INT29_PIN};
+auto BUTTON_2_3 = ToggleSwitchDouble{.buttonUp = 7,
+                                     .buttonDown = 8,
+                                     .pinUp = CORE_INT26_PIN,
+                                     .pinDown = CORE_INT27_PIN};
+auto BUTTON_2_4 = ToggleSwitchDouble{.buttonUp = 9,
+                                     .buttonDown = 10,
+                                     .pinUp = CORE_INT24_PIN,
+                                     .pinDown = CORE_INT25_PIN};
 auto BUTTON_2_5 = ToggleSwitchDouble{
-    .buttonUp = 11, .buttonDown = 12, .pinUp = 22, .pinDown = 23};
+    .buttonUp = 11, .buttonDown = 12, .pinUp = -1, .pinDown = -1};
 
 // row three: four rotary encoders
 auto BUTTON_3_1 = Encoder{.buttonLeft = 8,
@@ -181,16 +188,13 @@ public:
     }
 
     button = button + BUTTON_3_4.buttonClick + 1;
-    Serial.print("Pressing button: ");
+    Serial.print("Button pressed: ");
     Serial.println(button);
     Joystick.button(button, HIGH);
     digitalWrite(LED_BUILTIN, HIGH);
   }
 
   void keyReleased(char key) override {
-    Serial.print("Released ");
-    Serial.println(key);
-
     // lookup char position []char KEYBOARD_STD_3X5_KEYS
     int button = 99;
     for (int i = 0; KEYBOARD_STD_3X5_KEYS[i]; i++) {
@@ -201,7 +205,7 @@ public:
     }
 
     button = button + BUTTON_3_4.buttonClick + 1;
-    Serial.print("Releasing button: ");
+    Serial.print("Button released: ");
     Serial.println(button);
     Joystick.button(button, LOW);
     digitalWrite(LED_BUILTIN, LOW);
@@ -280,6 +284,22 @@ public:
   }
 };
 
+void initialisePushButton(PushButton *button) {
+  switches.addSwitchListener(button->pin, new ClickListener(button->button),
+                             NO_REPEAT);
+}
+
+void initialisePushButtons() {
+  initialisePushButton(&BUTTON_1_3);
+  initialisePushButton(&BUTTON_1_3);
+}
+
+void initialiseToggleSwitch(ToggleSwitch *s) {
+  switches.addSwitchListener(s->pin, new ClickListener(s->button), NO_REPEAT, true);
+}
+
+void initialiseToggleSwitches() { initialiseToggleSwitch(&BUTTON_1_1); }
+
 void initialiseDoubleToggleSwitch(ToggleSwitchDouble *toggleSwitch) {
   switches.addSwitchListener(toggleSwitch->pinUp,
                              new ClickListener(toggleSwitch->buttonUp),
@@ -294,7 +314,7 @@ void initialiseDoubleToggleSwitches() {
   initialiseDoubleToggleSwitch(&BUTTON_2_2);
   initialiseDoubleToggleSwitch(&BUTTON_2_3);
   initialiseDoubleToggleSwitch(&BUTTON_2_4);
-  initialiseDoubleToggleSwitch(&BUTTON_2_5);
+  /* initialiseDoubleToggleSwitch(&BUTTON_2_5); */
 }
 
 void initaliseEncoder(uint8_t slot, Encoder *encoder) {
@@ -303,11 +323,11 @@ void initaliseEncoder(uint8_t slot, Encoder *encoder) {
   HardwareRotaryEncoder *e = new HardwareRotaryEncoder(
       encoder->pinA, encoder->pinB, encoder->rotateListener);
   e->setUserIntention(DIRECTION_ONLY);
+  e->setEncoderType(QUARTER_CYCLE);
   switches.setEncoder(slot, e);
 
-  encoder->clickListener = new ClickListener(encoder->buttonClick);
-  switches.addSwitchListener(encoder->pinClick, encoder->clickListener,
-                             NO_REPEAT);
+  switches.addSwitchListener(
+      encoder->pinClick, new ClickListener(encoder->buttonClick), NO_REPEAT);
 }
 
 void initialiseEncoders() {
@@ -338,16 +358,25 @@ void setup() {
   // initialiseKeyboard4X4ForInterrupt23017();
   initialiseKeyboard3X5ForPollingDevicePins();
 
-  initialiseDoubleToggleSwitches();
+  /* initialisePushButtons(); */
+  /* initialiseToggleSwitches(); */
+  /* initialiseDoubleToggleSwitches(); */
   initialiseEncoders();
 
   // now set up the repeat key start and interval
   // keyboard.setRepeatKeyMillis(850, 350);
 
+  /* digitalWrite(LED_BUILTIN, LOW); */
   Serial.println("Keyboard is initialised!");
 }
 
 void loop() {
   // as this indirectly uses taskmanager, we must include this in loop.
   taskManager.runLoop();
+
+  /* while (true) { */
+  /*   pinMode(11, INPUT); */
+  /*   Serial.println(digitalRead(11)); */
+  /*   delay(100); */
+  /* } */
 }
