@@ -14,13 +14,19 @@
  * https://www.thecoderscorner.com/products/arduino-downloads/io-abstraction/
  * https://www.thecoderscorner.com/ref-docs/ioabstraction/html/index.html
  */
+// This optional setting causes Encoder to use more optimized code,
+// It must be defined before Encoder.h is included.
+#define ENCODER_OPTIMIZE_INTERRUPTS
 
 #include <Arduino.h>
+#include <EncoderButton.h>
 #include <IoAbstraction.h>
 #include <IoAbstractionWire.h>
 #include <IoLogging.h>
 #include <KeyboardManager.h>
 #include <TaskManagerIO.h>
+
+EncoderButton enc(19, 20);
 
 struct ToggleSwitch {
   int button;
@@ -39,7 +45,7 @@ struct PushButton {
   int pin;
 };
 
-struct Encoder {
+struct MyEncoder {
   int buttonLeft;
   int buttonRight;
   int buttonClick;
@@ -48,8 +54,12 @@ struct Encoder {
   int pinB;
   int pinClick;
 
+  bool useQuadPrecision;
   EncoderListener *rotateListener;
+  EncoderButton *button;
 };
+
+MyEncoder *encoders[8];
 
 // row one: two toggle buttons + one big button
 auto BUTTON_1_1 = ToggleSwitch{.button = 1, .pin = CORE_INT11_PIN};
@@ -77,30 +87,30 @@ auto BUTTON_2_5 = ToggleSwitchDouble{
     .buttonUp = 11, .buttonDown = 12, .pinUp = -1, .pinDown = -1};
 
 // row three: four rotary encoders
-auto BUTTON_3_1 = Encoder{.buttonLeft = 8,
-                          .buttonRight = 9,
-                          .buttonClick = 10,
-                          .pinA = CORE_INT23_PIN,
-                          .pinB = CORE_INT22_PIN,
-                          .pinClick = CORE_INT21_PIN};
-auto BUTTON_3_2 = Encoder{.buttonLeft = 11,
-                          .buttonRight = 12,
-                          .buttonClick = 13,
-                          .pinA = CORE_INT41_PIN,
-                          .pinB = CORE_INT40_PIN,
-                          .pinClick = CORE_INT39_PIN};
-auto BUTTON_3_3 = Encoder{.buttonLeft = 14,
-                          .buttonRight = 15,
-                          .buttonClick = 16,
-                          .pinA = CORE_INT38_PIN,
-                          .pinB = CORE_INT37_PIN,
-                          .pinClick = CORE_INT36_PIN};
-auto BUTTON_3_4 = Encoder{.buttonLeft = 17,
-                          .buttonRight = 18,
-                          .buttonClick = 19,
-                          .pinA = CORE_INT35_PIN,
-                          .pinB = CORE_INT34_PIN,
-                          .pinClick = CORE_INT33_PIN};
+auto BUTTON_3_1 = MyEncoder{.buttonLeft = 8,
+                            .buttonRight = 9,
+                            .buttonClick = 10,
+                            .pinA = CORE_INT23_PIN,
+                            .pinB = CORE_INT22_PIN,
+                            .pinClick = CORE_INT21_PIN};
+auto BUTTON_3_2 = MyEncoder{.buttonLeft = 11,
+                            .buttonRight = 12,
+                            .buttonClick = 13,
+                            .pinA = CORE_INT41_PIN,
+                            .pinB = CORE_INT40_PIN,
+                            .pinClick = CORE_INT39_PIN};
+auto BUTTON_3_3 = MyEncoder{.buttonLeft = 14,
+                            .buttonRight = 15,
+                            .buttonClick = 16,
+                            .pinA = CORE_INT38_PIN,
+                            .pinB = CORE_INT37_PIN,
+                            .pinClick = CORE_INT36_PIN};
+auto BUTTON_3_4 = MyEncoder{.buttonLeft = 17,
+                            .buttonRight = 18,
+                            .buttonClick = 19,
+                            .pinA = CORE_INT35_PIN,
+                            .pinB = CORE_INT34_PIN,
+                            .pinClick = CORE_INT33_PIN};
 
 // row four: matrix buttons (5x3)
 auto BUTTON_4_1 = PushButton{.button = 20, .pin = -1};
@@ -122,26 +132,27 @@ auto BUTTON_6_5 = PushButton{.button = 34, .pin = -1};
 // row five: handle 3 rotary encoders at the bottom as one row
 
 // big rotary encoder
-auto BUTTON_7_1 = Encoder{.buttonLeft = 35,
-                          .buttonRight = 36,
-                          .buttonClick = 37,
-                          .pinA = CORE_INT20_PIN,
-                          .pinB = CORE_INT19_PIN,
-                          .pinClick = CORE_INT18_PIN};
+auto BUTTON_7_1 = MyEncoder{.buttonLeft = 35,
+                            .buttonRight = 36,
+                            .buttonClick = 37,
+                            .pinA = CORE_INT20_PIN,
+                            .pinB = CORE_INT19_PIN,
+                            .pinClick = CORE_INT18_PIN,
+                            .useQuadPrecision = true};
 
 // smaller rotary encoders
-auto BUTTON_7_2 = Encoder{.buttonLeft = 38,
-                          .buttonRight = 39,
-                          .buttonClick = 40,
-                          .pinA = CORE_INT17_PIN,
-                          .pinB = CORE_INT16_PIN,
-                          .pinClick = CORE_INT15_PIN};
-auto BUTTON_7_3 = Encoder{.buttonLeft = 41,
-                          .buttonRight = 42,
-                          .buttonClick = 43,
-                          .pinA = CORE_INT14_PIN,
-                          .pinB = CORE_INT13_PIN,
-                          .pinClick = CORE_INT32_PIN};
+auto BUTTON_7_2 = MyEncoder{.buttonLeft = 38,
+                            .buttonRight = 39,
+                            .buttonClick = 40,
+                            .pinA = CORE_INT17_PIN,
+                            .pinB = CORE_INT16_PIN,
+                            .pinClick = CORE_INT15_PIN};
+auto BUTTON_7_3 = MyEncoder{.buttonLeft = 41,
+                            .buttonRight = 42,
+                            .buttonClick = 43,
+                            .pinA = CORE_INT14_PIN,
+                            .pinB = CORE_INT13_PIN,
+                            .pinClick = CORE_INT32_PIN};
 
 //
 // We need to make a keyboard layout that the manager can use. choose one of the
@@ -239,6 +250,10 @@ public:
       Joystick.button(this->buttonLeft, LOW);
     }
   }
+
+  void operator()(EncoderButton &eb) const {
+    encoderHasChanged(eb.increment());
+  }
 };
 
 /**
@@ -295,7 +310,8 @@ void initialisePushButtons() {
 }
 
 void initialiseToggleSwitch(ToggleSwitch *s) {
-  switches.addSwitchListener(s->pin, new ClickListener(s->button), NO_REPEAT, true);
+  switches.addSwitchListener(s->pin, new ClickListener(s->button), NO_REPEAT,
+                             true);
 }
 
 void initialiseToggleSwitches() { initialiseToggleSwitch(&BUTTON_1_1); }
@@ -317,17 +333,15 @@ void initialiseDoubleToggleSwitches() {
   /* initialiseDoubleToggleSwitch(&BUTTON_2_5); */
 }
 
-void initaliseEncoder(uint8_t slot, Encoder *encoder) {
-  encoder->rotateListener =
-      new EncoderRotateListener(encoder->buttonLeft, encoder->buttonRight);
-  HardwareRotaryEncoder *e = new HardwareRotaryEncoder(
-      encoder->pinA, encoder->pinB, encoder->rotateListener);
-  e->setUserIntention(DIRECTION_ONLY);
-  e->setEncoderType(QUARTER_CYCLE);
-  switches.setEncoder(slot, e);
+void initaliseEncoder(uint8_t slot, MyEncoder *e) {
+  encoders[slot] = e;
+  e->button = new EncoderButton(e->pinA, e->pinB, e->pinClick);
+  e->button->useQuadPrecision(e->useQuadPrecision);
 
-  switches.addSwitchListener(
-      encoder->pinClick, new ClickListener(encoder->buttonClick), NO_REPEAT);
+  EncoderRotateListener *cb =
+      new EncoderRotateListener(e->buttonLeft, e->buttonRight);
+  e->rotateListener = cb;
+  e->button->setEncoderHandler(*cb);
 }
 
 void initialiseEncoders() {
@@ -339,6 +353,14 @@ void initialiseEncoders() {
   initaliseEncoder(4, &BUTTON_7_1);
   initaliseEncoder(5, &BUTTON_7_2);
   initaliseEncoder(6, &BUTTON_7_3);
+
+  taskManager.schedule(repeatMillis(10), [] {
+    for (MyEncoder *e : encoders) {
+      if (e != NULL) {
+        e->button->update();
+      }
+    }
+  });
 }
 
 void setup() {
@@ -356,7 +378,7 @@ void setup() {
   // here you can choose between two stock configurations or you could alter one
   // of the methods to meet your hardware requirements.
   // initialiseKeyboard4X4ForInterrupt23017();
-  initialiseKeyboard3X5ForPollingDevicePins();
+  /* initialiseKeyboard3X5ForPollingDevicePins(); */
 
   /* initialisePushButtons(); */
   /* initialiseToggleSwitches(); */
@@ -373,10 +395,4 @@ void setup() {
 void loop() {
   // as this indirectly uses taskmanager, we must include this in loop.
   taskManager.runLoop();
-
-  /* while (true) { */
-  /*   pinMode(11, INPUT); */
-  /*   Serial.println(digitalRead(11)); */
-  /*   delay(100); */
-  /* } */
 }
