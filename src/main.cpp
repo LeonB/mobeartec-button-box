@@ -26,8 +26,6 @@
 #include <KeyboardManager.h>
 #include <TaskManagerIO.h>
 
-EncoderButton enc(19, 20);
-
 struct ToggleSwitch {
   int button;
   int pin;
@@ -87,69 +85,69 @@ auto BUTTON_2_5 = ToggleSwitchDouble{
     .buttonUp = 11, .buttonDown = 12, .pinUp = -1, .pinDown = -1};
 
 // row three: four rotary encoders
-auto BUTTON_3_1 = MyEncoder{.buttonLeft = 8,
-                            .buttonRight = 9,
-                            .buttonClick = 10,
+auto BUTTON_3_1 = MyEncoder{.buttonLeft = 13,
+                            .buttonRight = 14,
+                            .buttonClick = 15,
                             .pinA = CORE_INT23_PIN,
                             .pinB = CORE_INT22_PIN,
                             .pinClick = CORE_INT21_PIN};
-auto BUTTON_3_2 = MyEncoder{.buttonLeft = 11,
-                            .buttonRight = 12,
-                            .buttonClick = 13,
+auto BUTTON_3_2 = MyEncoder{.buttonLeft = 16,
+                            .buttonRight = 17,
+                            .buttonClick = 18,
                             .pinA = CORE_INT41_PIN,
                             .pinB = CORE_INT40_PIN,
                             .pinClick = CORE_INT39_PIN};
-auto BUTTON_3_3 = MyEncoder{.buttonLeft = 14,
-                            .buttonRight = 15,
-                            .buttonClick = 16,
+auto BUTTON_3_3 = MyEncoder{.buttonLeft = 19,
+                            .buttonRight = 20,
+                            .buttonClick = 21,
                             .pinA = CORE_INT38_PIN,
                             .pinB = CORE_INT37_PIN,
                             .pinClick = CORE_INT36_PIN};
-auto BUTTON_3_4 = MyEncoder{.buttonLeft = 17,
-                            .buttonRight = 18,
-                            .buttonClick = 19,
+auto BUTTON_3_4 = MyEncoder{.buttonLeft = 22,
+                            .buttonRight = 23,
+                            .buttonClick = 24,
                             .pinA = CORE_INT35_PIN,
                             .pinB = CORE_INT34_PIN,
                             .pinClick = CORE_INT33_PIN};
 
 // row four: matrix buttons (5x3)
-auto BUTTON_4_1 = PushButton{.button = 20, .pin = -1};
-auto BUTTON_4_2 = PushButton{.button = 21, .pin = -1};
-auto BUTTON_4_3 = PushButton{.button = 22, .pin = -1};
-auto BUTTON_4_4 = PushButton{.button = 23, .pin = -1};
-auto BUTTON_4_5 = PushButton{.button = 24, .pin = -1};
-auto BUTTON_5_1 = PushButton{.button = 25, .pin = -1};
-auto BUTTON_5_2 = PushButton{.button = 26, .pin = -1};
-auto BUTTON_5_3 = PushButton{.button = 27, .pin = -1};
-auto BUTTON_5_4 = PushButton{.button = 28, .pin = -1};
-auto BUTTON_5_5 = PushButton{.button = 29, .pin = -1};
-auto BUTTON_6_1 = PushButton{.button = 30, .pin = -1};
-auto BUTTON_6_2 = PushButton{.button = 31, .pin = -1};
-auto BUTTON_6_3 = PushButton{.button = 32, .pin = -1};
-auto BUTTON_6_4 = PushButton{.button = 33, .pin = -1};
-auto BUTTON_6_5 = PushButton{.button = 34, .pin = -1};
+auto BUTTON_4_1 = PushButton{.button = 25, .pin = -1};
+auto BUTTON_4_2 = PushButton{.button = 26, .pin = -1};
+auto BUTTON_4_3 = PushButton{.button = 27, .pin = -1};
+auto BUTTON_4_4 = PushButton{.button = 28, .pin = -1};
+auto BUTTON_4_5 = PushButton{.button = 29, .pin = -1};
+auto BUTTON_5_1 = PushButton{.button = 30, .pin = -1};
+auto BUTTON_5_2 = PushButton{.button = 31, .pin = -1};
+auto BUTTON_5_3 = PushButton{.button = 32, .pin = -1};
+auto BUTTON_5_4 = PushButton{.button = 33, .pin = -1};
+auto BUTTON_5_5 = PushButton{.button = 34, .pin = -1};
+auto BUTTON_6_1 = PushButton{.button = 35, .pin = -1};
+auto BUTTON_6_2 = PushButton{.button = 36, .pin = -1};
+auto BUTTON_6_3 = PushButton{.button = 37, .pin = -1};
+auto BUTTON_6_4 = PushButton{.button = 38, .pin = -1};
+auto BUTTON_6_5 = PushButton{.button = 39, .pin = -1};
 
 // row five: handle 3 rotary encoders at the bottom as one row
 
 // big rotary encoder
-auto BUTTON_7_1 = MyEncoder{.buttonLeft = 35,
-                            .buttonRight = 36,
-                            .buttonClick = 37,
+auto BUTTON_7_1 = MyEncoder{.buttonLeft = 40,
+                            .buttonRight = 41,
+                            .buttonClick = -1,
                             .pinA = CORE_INT20_PIN,
                             .pinB = CORE_INT19_PIN,
                             .pinClick = CORE_INT18_PIN,
                             .useQuadPrecision = true};
 
 // smaller rotary encoders
-auto BUTTON_7_2 = MyEncoder{.buttonLeft = 38,
-                            .buttonRight = 39,
-                            .buttonClick = 40,
+auto BUTTON_7_2 = MyEncoder{.buttonLeft = 42,
+                            .buttonRight = 43,
+                            .buttonClick = 44,
                             .pinA = CORE_INT17_PIN,
                             .pinB = CORE_INT16_PIN,
                             .pinClick = CORE_INT15_PIN};
-auto BUTTON_7_3 = MyEncoder{.buttonLeft = 41,
-                            .buttonRight = 42,
-                            .buttonClick = 43,
+auto BUTTON_7_3 = MyEncoder{.buttonLeft = 45,
+                            .buttonRight = 46,
+                            .buttonClick = 47,
                             .pinA = CORE_INT14_PIN,
                             .pinB = CORE_INT13_PIN,
                             .pinClick = CORE_INT32_PIN};
@@ -261,7 +259,7 @@ public:
  * We assume a 4x3 keyboard was set at the top. We use the keyboard in polling
  * mode in this case. Polling mode can be used on any device.
  */
-void initialiseKeyboard3X5ForPollingDevicePins() {
+void initialiseKeyboard3X5() {
   keyLayout.setRowPin(0, CORE_INT0_PIN);
   keyLayout.setRowPin(1, CORE_INT1_PIN);
   keyLayout.setRowPin(2, CORE_INT2_PIN);
@@ -342,6 +340,9 @@ void initaliseEncoder(uint8_t slot, MyEncoder *e) {
       new EncoderRotateListener(e->buttonLeft, e->buttonRight);
   e->rotateListener = cb;
   e->button->setEncoderHandler(*cb);
+
+  switches.addSwitchListener(
+      e->pinClick, new ClickListener(e->buttonClick), NO_REPEAT);
 }
 
 void initialiseEncoders() {
@@ -377,12 +378,11 @@ void setup() {
 
   // here you can choose between two stock configurations or you could alter one
   // of the methods to meet your hardware requirements.
-  // initialiseKeyboard4X4ForInterrupt23017();
-  /* initialiseKeyboard3X5ForPollingDevicePins(); */
+  initialiseKeyboard3X5();
 
-  /* initialisePushButtons(); */
-  /* initialiseToggleSwitches(); */
-  /* initialiseDoubleToggleSwitches(); */
+  initialisePushButtons();
+  initialiseToggleSwitches();
+  initialiseDoubleToggleSwitches();
   initialiseEncoders();
 
   // now set up the repeat key start and interval
