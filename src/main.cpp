@@ -81,8 +81,10 @@ auto BUTTON_2_4 = ToggleSwitchDouble{.buttonUp = 9,
                                      .buttonDown = 10,
                                      .pinUp = CORE_INT24_PIN,
                                      .pinDown = CORE_INT25_PIN};
-auto BUTTON_2_5 = ToggleSwitchDouble{
-    .buttonUp = 11, .buttonDown = 12, .pinUp = -1, .pinDown = -1};
+auto BUTTON_2_5 = ToggleSwitchDouble{.buttonUp = 11,
+                                     .buttonDown = 12,
+                                     .pinUp = CORE_INT9_PIN,
+                                     .pinDown = CORE_INT10_PIN};
 
 // row three: four rotary encoders
 auto BUTTON_3_1 = MyEncoder{.buttonLeft = 13,
@@ -238,14 +240,21 @@ public:
       Serial.print(" ");
       Serial.println("right");
       Joystick.button(this->buttonRight, HIGH);
-      Joystick.button(this->buttonRight, LOW);
+      // Joystick.button(this->buttonRight, LOW);
+      int button = this->buttonRight;
+      taskManager.schedule(onceMillis(20),
+                           [button]() { Joystick.button(button, LOW); });
+
 
     } else if (newValue < 0) {
       Serial.print(this->buttonLeft);
       Serial.print(" ");
       Serial.println("left");
       Joystick.button(this->buttonLeft, HIGH);
-      Joystick.button(this->buttonLeft, LOW);
+      // Joystick.button(this->buttonLeft, LOW);
+      int button = this->buttonLeft;
+      taskManager.schedule(onceMillis(20),
+                           [button]() { Joystick.button(button, LOW); });
     }
   }
 
@@ -328,7 +337,7 @@ void initialiseDoubleToggleSwitches() {
   initialiseDoubleToggleSwitch(&BUTTON_2_2);
   initialiseDoubleToggleSwitch(&BUTTON_2_3);
   initialiseDoubleToggleSwitch(&BUTTON_2_4);
-  /* initialiseDoubleToggleSwitch(&BUTTON_2_5); */
+  initialiseDoubleToggleSwitch(&BUTTON_2_5);
 }
 
 void initaliseEncoder(uint8_t slot, MyEncoder *e) {
@@ -341,8 +350,8 @@ void initaliseEncoder(uint8_t slot, MyEncoder *e) {
   e->rotateListener = cb;
   e->button->setEncoderHandler(*cb);
 
-  switches.addSwitchListener(
-      e->pinClick, new ClickListener(e->buttonClick), NO_REPEAT);
+  switches.addSwitchListener(e->pinClick, new ClickListener(e->buttonClick),
+                             NO_REPEAT);
 }
 
 void initialiseEncoders() {
